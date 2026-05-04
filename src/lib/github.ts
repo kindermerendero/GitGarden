@@ -1,7 +1,7 @@
 import { Octokit } from "octokit";
 
 const octokit = new Octokit({
-  auth: process.env.GITHUB_TOKEN,
+  auth: process.env.GITHUB_TOKEN || undefined,
 });
 
 export interface CommitData {
@@ -14,35 +14,69 @@ export interface CommitData {
   linesChanged: number;
 }
 
-export async function fetchCommits(owner: string, repo: string): Promise<CommitData[]> {
-  const { data: commits } = await octokit.rest.repos.listCommits({
-    owner,
-    repo,
-    per_page: 30,
-  });
+interface GraphQLCommitNode {
+  oid: string;
+  messageHeadline: string;
+  author: { name: string; date: string } | null;
+  additions: number;
+  deletions: number;
+}
 
-  const commitDetails = await Promise.all(
-    commits.map(async (commit) => {
-      const { data: detail } = await octokit.rest.repos.getCommit({
-        owner,
-        repo,
-        ref: commit.sha,
-      });
-
-      const additions = detail.stats?.additions ?? 0;
-      const deletions = detail.stats?.deletions ?? 0;
-
-      return {
-        sha: commit.sha,
-        message: commit.commit.message.split("\n")[0],
-        author: commit.commit.author?.name ?? "unknown",
-        date: commit.commit.author?.date ?? "",
-        additions,
-        deletions,
-        linesChanged: additions + deletions,
+interface GraphQLResponse {
+  repository: {
+    defaultBranchRef: {
+      target: {
+        history: {
+          nodes: GraphQLCommitNode[];
+        };
       };
-    })
+    } | null;
+  } | null;
+}
+
+// Single GraphQL request — fetches 30 commits with stats in one round-trip
+export async function fetchCommits(owner: string, repo: string): Promise<CommitData[]> {
+  if (!process.env.GITHUB_TOKEN) {
+    throw new Error(
+      "GITHUB_TOKEN mancante. Aggiungilo in .env.local per usare GitGarden."
+    );
+  }
+
+  const data = await octokit.graphql<GraphQLResponse>(
+    `query($owner: String!, $repo: String!) {
+      repository(owner: $owner, name: $repo) {
+        defaultBranchRef {
+          target {
+            ... on Commit {
+              history(first: 30) {
+                nodes {
+                  oid
+                  messageHeadline
+                  author { name date }
+                  additions
+                  deletions
+                }
+              }
+            }
+          }
+        }
+      }
+    }`,
+    { owner, repo }
   );
 
-  return commitDetails;
+  const branch = data?.repository?.defaultBranchRef;
+  if (!branch) throw new Error(`Repository "${owner}/${repo}" non trovato o senza branch di default.`);
+
+  const nodes = branch.target.history.nodes;
+
+  return nodes.map((n) => ({
+    sha: n.oid,
+    message: n.messageHeadline,
+    author: n.author?.name ?? "unknown",
+    date: n.author?.date ?? "",
+    additions: n.additions,
+    deletions: n.deletions,
+    linesChanged: n.additions + n.deletions,
+  }));
 }
