@@ -3,6 +3,7 @@
 import { motion } from "framer-motion";
 import { PlantData } from "@/lib/plantMapper";
 import { Plant, plantVariants } from "./Plant";
+import { GRASS, DIRT } from "@/lib/sprites";
 
 interface GardenProps {
   plants: PlantData[];
@@ -11,14 +12,8 @@ interface GardenProps {
 const PX = 6;
 const BLOCKS = 200;
 
-function grassColor(i: number) {
-  const v = ["#3a8c22","#2d7a1a","#44a028","#328024","#26661a"];
-  return v[(i * 7 + i * i) % v.length];
-}
-function dirtColor(i: number) {
-  const v = ["#5a3a1e","#4a2e14","#634020","#523418","#3e2810"];
-  return v[(i * 3 + i) % v.length];
-}
+const grassColor = (i: number) => GRASS[(i * 7 + i * i) % GRASS.length];
+const dirtColor  = (i: number) => DIRT[(i * 3 + i) % DIRT.length];
 
 export function Garden({ plants }: GardenProps) {
   const totalLines    = plants.reduce((a, p) => a + p.linesChanged, 0);
@@ -39,8 +34,8 @@ export function Garden({ plants }: GardenProps) {
         initial="hidden"
         animate="visible"
       >
-        {plants.map((plant, i) => (
-          <Plant key={plant.sha} plant={plant} index={i} />
+        {plants.map((plant) => (
+          <Plant key={plant.sha} plant={plant} />
         ))}
       </motion.div>
 

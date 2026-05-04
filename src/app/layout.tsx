@@ -23,7 +23,18 @@ const geist = Geist({
 
 export const metadata: Metadata = {
   title: "GitGarden — commit as plants",
-  description: "Transform any GitHub repository's commits into a generative digital garden.",
+  description: "Turn any GitHub repository's commit history into a generative pixel-art garden. Every commit is a plant.",
+  openGraph: {
+    title: "GitGarden",
+    description: "Every commit is a plant. Every repo, a garden.",
+    siteName: "GitGarden",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "GitGarden",
+    description: "Every commit is a plant. Every repo, a garden.",
+  },
 };
 
 export default function RootLayout({

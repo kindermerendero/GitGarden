@@ -8,6 +8,9 @@ import { SearchForm } from "@/components/SearchForm";
 import { ShareSection } from "@/components/ShareSection";
 import { getTimeTheme, TimeTheme } from "@/lib/timeTheme";
 
+// Session-level cache — no TTL by design (fresh on page reload)
+const gardenCache = new Map<string, PlantData[]>();
+
 export default function Home() {
   const [plants, setPlants] = useState<PlantData[]>([]);
   const [loading, setLoading] = useState(false);
@@ -30,14 +33,22 @@ export default function Home() {
   }, []);
 
   const handleGenerate = async (repo: string) => {
-    setLoading(true);
     setError(null);
+
+    if (gardenCache.has(repo)) {
+      setPlants(gardenCache.get(repo)!);
+      setCurrentRepo(repo);
+      return;
+    }
+
+    setLoading(true);
     setPlants([]);
 
     try {
       const res = await fetch(`/api/commits?repo=${encodeURIComponent(repo)}`);
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Errore sconosciuto");
+      gardenCache.set(repo, data.plants);
       setPlants(data.plants);
       setCurrentRepo(repo);
     } catch (err) {

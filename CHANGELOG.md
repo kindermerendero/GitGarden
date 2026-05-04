@@ -1,5 +1,18 @@
 # Changelog
 
+## [2026-05-04] — Fix audit: qualità codice, robustezza, DX
+
+- **sprites.ts**: SPRITES, CENTERS, GRASS, DIRT, shadowColor, highlightColor centralizzati in un'unica source of truth (erano duplicati in Plant.tsx e svg/route.ts)
+- **plantMapper.ts**: rimosso campo `petalCount` (mai usato); rimosso "refactor" da POSITIVE_KEYWORDS (ora in NEGATIVE); fix edge case array vuoto
+- **Plant.tsx**: rimossa prop `index` (dead dopo stagger refactor); import da sprites.ts
+- **Garden.tsx**: import GRASS/DIRT da sprites.ts; rimosso parametro `i` inutilizzato in plants.map
+- **github.ts**: timeout 12s con AbortController; messaggi d'errore tradotti e user-friendly per 401, 404, 429, timeout
+- **commits/route.ts**: validazione con regex `^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$` (chiude bypass "a/" e "/b")
+- **garden/svg/route.ts**: stessa validazione regex; import da sprites.ts; usa shadowColor/highlightColor invece di darken()
+- **page.tsx**: cache session-level `Map<string, PlantData[]>` — stesso repo non ri-fetcha
+- **layout.tsx**: Open Graph e Twitter Card metadata
+- **error.tsx**: nuovo error boundary con UI coerente
+
 ## [2026-05-04] — Deep visual restyling (4 pilastri)
 
 **Pillar 1 — Grain & Texture**

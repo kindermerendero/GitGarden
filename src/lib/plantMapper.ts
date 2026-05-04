@@ -1,7 +1,7 @@
 import { CommitData } from "./github";
 
-const POSITIVE_KEYWORDS = ["add", "feat", "feature", "improve", "update", "enhance", "create", "init", "implement", "new", "upgrade", "refactor", "clean"];
-const NEGATIVE_KEYWORDS = ["fix", "bug", "patch", "hotfix", "revert", "hack", "workaround", "broken", "error", "fail", "crash", "issue", "problem"];
+const POSITIVE_KEYWORDS = ["add", "feat", "feature", "improve", "update", "enhance", "create", "init", "implement", "new", "upgrade", "clean"];
+const NEGATIVE_KEYWORDS = ["fix", "bug", "patch", "hotfix", "revert", "hack", "workaround", "broken", "error", "fail", "crash", "issue", "problem", "refactor"];
 
 export type PlantSentiment = "positive" | "negative" | "neutral";
 
@@ -10,7 +10,6 @@ export interface PlantData extends CommitData {
   sentiment: PlantSentiment;
   petalColor: string;
   stemColor: string;
-  petalCount: number;
 }
 
 // 12-color signature palette (4 per sentiment family)
@@ -18,7 +17,7 @@ export const SIGNATURE = {
   positive: ["#7EC8A4", "#5BB5D5", "#4ECDC4", "#95E1D3"] as const,
   negative: ["#E07A7A", "#C47EC8", "#D4608A", "#BF6BBF"] as const,
   neutral:  ["#D4C5A9", "#C9B99A", "#E0D5C0", "#BFB49A"] as const,
-} as const;
+};
 
 const STEMS: Record<PlantSentiment, string> = {
   positive: "#4a7c59",
@@ -42,20 +41,18 @@ function normalizeHeight(linesChanged: number, max: number): number {
 }
 
 export function mapCommitsToPlants(commits: CommitData[]): PlantData[] {
-  const maxLines = Math.max(...commits.map((c) => c.linesChanged), 1);
+  const maxLines = commits.length > 0
+    ? Math.max(...commits.map((c) => c.linesChanged), 1)
+    : 1;
 
   return commits.map((commit, i) => {
     const sentiment = getSentiment(commit.message);
-    const petalColor = SIGNATURE[sentiment][i % SIGNATURE[sentiment].length];
-    const petalCount = 4 + (commit.sha.charCodeAt(0) % 4);
-
     return {
       ...commit,
       stemHeight: normalizeHeight(commit.linesChanged, maxLines),
       sentiment,
-      petalColor,
+      petalColor: SIGNATURE[sentiment][i % SIGNATURE[sentiment].length],
       stemColor: STEMS[sentiment],
-      petalCount,
     };
   });
 }
