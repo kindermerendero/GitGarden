@@ -1,5 +1,17 @@
 # Changelog
 
+## [2026-05-04] — Export to README (SVG dinamico)
+
+- Nuova route `GET /api/garden/svg?repo=owner/repo` — genera SVG pixel-art completo server-side
+- Stessa logica sprite di Plant.tsx (6 template, PX=6, shadow, highlight, foglie diagonali)
+- Terreno Minecraft (erba + dirt) incluso nell'SVG
+- Glow radiale atmosferico con gradient SVG, colore segue il day/night cycle
+- Header: `Content-Type: image/svg+xml`, `Cache-Control: s-maxage=3600, stale-while-revalidate=86400`
+- Parametro opzionale `?hour=N` per forzare la fascia oraria
+- Watermark "GitGarden" in basso a destra in Georgia serif
+- Nuovo componente `ShareSection` — preview SVG + campo markdown + copy button con feedback animato
+- `ShareSection` appare sotto il giardino dopo la generazione, con delay 2.4s
+
 ## [2026-05-04] — Day/Night mode organica basata sull'ora locale
 
 - Aggiunto `src/lib/timeTheme.ts` — 7 fasce orarie (night, dawn, morning, midday, afternoon, dusk, evening) con colori `bg` e `glow` distinti

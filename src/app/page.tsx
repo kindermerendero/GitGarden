@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { PlantData } from "@/lib/plantMapper";
 import { Garden } from "@/components/Garden";
 import { SearchForm } from "@/components/SearchForm";
+import { ShareSection } from "@/components/ShareSection";
 import { getTimeTheme, TimeTheme } from "@/lib/timeTheme";
 
 export default function Home() {
@@ -131,6 +132,7 @@ export default function Home() {
                 {currentRepo}
               </motion.p>
               <Garden plants={plants} />
+              <ShareSection repo={currentRepo!} />
             </motion.div>
           )}
 
