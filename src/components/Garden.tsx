@@ -9,11 +9,23 @@ interface GardenProps {
   plants: PlantData[];
 }
 
-const PX = 6;
+const PX     = 6;
 const BLOCKS = 200;
 
 const grassColor = (i: number) => GRASS[(i * 7 + i * i) % GRASS.length];
 const dirtColor  = (i: number) => DIRT[(i * 3 + i) % DIRT.length];
+
+// Deterministic scatter for ground decorations
+function groundDetails() {
+  const items: { x: number; type: "rock" | "tuft" }[] = [];
+  for (let i = 0; i < 55; i++) {
+    const x = (i * 97 + i * i * 13) % (BLOCKS * PX - PX * 3);
+    const type = i % 3 === 0 ? "tuft" : "rock";
+    items.push({ x, type });
+  }
+  return items;
+}
+const GROUND_DETAILS = groundDetails();
 
 export function Garden({ plants }: GardenProps) {
   const totalLines    = plants.reduce((a, p) => a + p.linesChanged, 0);
@@ -25,11 +37,10 @@ export function Garden({ plants }: GardenProps) {
       {/* ── Plants with staggerChildren ── */}
       <motion.div
         className="flex items-end justify-center gap-1 flex-wrap px-4 pb-0 min-h-[220px]"
+        style={{ overflow: "visible" }}
         variants={{
           hidden: {},
-          visible: {
-            transition: { staggerChildren: 0.07, delayChildren: 0.05 },
-          },
+          visible: { transition: { staggerChildren: 0.07, delayChildren: 0.05 } },
         }}
         initial="hidden"
         animate="visible"
@@ -39,13 +50,40 @@ export function Garden({ plants }: GardenProps) {
         ))}
       </motion.div>
 
-      {/* ── Pixel-art ground ── */}
+      {/* ── Ground ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
         style={{ lineHeight: 0 }}
       >
+        {/* Decorative details: rocks and grass tufts */}
+        <svg
+          width="100%"
+          height={PX * 2}
+          viewBox={`0 0 ${BLOCKS * PX} ${PX * 2}`}
+          preserveAspectRatio="none"
+          shapeRendering="crispEdges"
+          style={{ imageRendering: "pixelated", display: "block" }}
+        >
+          {GROUND_DETAILS.map(({ x, type }, i) =>
+            type === "tuft" ? (
+              // Grass tuft: 2 thin vertical pixels above ground
+              <g key={i}>
+                <rect x={x}     y={0}      width={2} height={PX} fill="#44a028" opacity={0.50} />
+                <rect x={x + 4} y={PX / 2} width={2} height={PX / 2} fill="#3a8c22" opacity={0.35} />
+              </g>
+            ) : (
+              // Rock: 1-2 gray pixels on the ground surface
+              <g key={i}>
+                <rect x={x} y={PX} width={PX} height={PX} fill="#9a9a8a" opacity={0.22} />
+                {i % 2 === 0 && <rect x={x + PX} y={PX} width={PX} height={PX} fill="#888880" opacity={0.16} />}
+              </g>
+            )
+          )}
+        </svg>
+
+        {/* Grass row */}
         <svg
           width="100%" height={PX}
           viewBox={`0 0 ${BLOCKS * PX} ${PX}`}
@@ -54,10 +92,12 @@ export function Garden({ plants }: GardenProps) {
           style={{ imageRendering: "pixelated", display: "block" }}
         >
           {Array.from({ length: BLOCKS }, (_, i) => (
-            <rect key={i} x={i*PX} y={0} width={PX} height={PX} fill={grassColor(i)} opacity={0.90} />
+            <rect key={i} x={i * PX} y={0} width={PX} height={PX} fill={grassColor(i)} opacity={0.90} />
           ))}
         </svg>
-        {[0,1].map((row) => (
+
+        {/* Dirt rows */}
+        {[0, 1].map((row) => (
           <svg
             key={row}
             width="100%" height={PX}
@@ -67,9 +107,9 @@ export function Garden({ plants }: GardenProps) {
             style={{ imageRendering: "pixelated", display: "block" }}
           >
             {Array.from({ length: BLOCKS }, (_, i) => (
-              <rect key={i} x={i*PX} y={0} width={PX} height={PX}
+              <rect key={i} x={i * PX} y={0} width={PX} height={PX}
                 fill={dirtColor(i + row * 13)}
-                opacity={(0.75 - row * 0.2)}
+                opacity={0.75 - row * 0.2}
               />
             ))}
           </svg>
@@ -109,6 +149,7 @@ export function Garden({ plants }: GardenProps) {
           { color: "#7EC8A4", label: "feat · add" },
           { color: "#E07A7A", label: "fix · bug" },
           { color: "#C9B99A", label: "neutral" },
+          { color: "#f59e0b", label: "★ legendary" },
         ].map(({ color, label }) => (
           <span key={label} className="text-white/20 flex items-center gap-1.5">
             <svg width="6" height="6" shapeRendering="crispEdges" style={{ imageRendering: "pixelated", display: "inline-block" }}>
@@ -117,7 +158,6 @@ export function Garden({ plants }: GardenProps) {
             {label}
           </span>
         ))}
-        <span className="text-white/20">stelo ∝ Δ righe</span>
       </motion.div>
     </div>
   );

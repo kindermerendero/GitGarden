@@ -1,5 +1,32 @@
 # Changelog
 
+## [2026-05-04] — Final touches: Rare Blooms, Growth Animation, Ground Detail, RPG Tooltips, Sound
+
+**Rare Blooms**
+- `plantMapper.ts`: campo `legendary: boolean` — true se >1000 righe o commit più antico di un batch ≥25
+- `sprites.ts`: aggiunto sprite 9×9 ornato (index 6), riservato ai legendary; costanti `LEGENDARY_SPRITE_IDX` e `REGULAR_SPRITE_COUNT`
+- Legendary plants: sprite speciale + super-glow triplo (3 drop-shadow) + 4 pixel orbit animati in loop (rotate 360°, 5s)
+- svg/route.ts: aggiornato per usare legendary sprite nella generazione SVG
+
+**Growth Animation**
+- Stelo e fiore separati in due `motion.svg` con animazioni indipendenti
+- Stelo: `scaleY: 0→1` da `bottom center`, ease lineare, 0.55s
+- Fiore: `scale: 0→1, rotate: -100°→0°` con `type: "spring", stiffness: 260, damping: 12`, delay 0.48s
+- `transformOrigin` calibrato sul punto di giunzione stelo-fiore
+
+**Ground Detail**
+- `Garden.tsx`: SVG decorativo sopra l'erba con 55 elementi deterministici — ciuffi d'erba (2px verticali) e sassi (pixel grigio)
+- `Plant.tsx`: div glow colorato in basso a ogni pianta (`radial-gradient + blur`) proietta luce sulla terra
+
+**RPG Tooltips**
+- `lore.ts`: 15 frasi generate da sentiment, linesChanged, keywords nel messaggio
+- `PixelTooltip`: bordo pixel-art 2px, titolo in Geist, lore in *Instrument Serif* italic, stats +/− con badge ★ legendary
+- Animazione `scale: 0.96→1` + `y: 6→0` su hover
+
+**Sound**
+- Web Audio API: `AudioContext` condiviso a livello modulo, oscillatore square-wave 720Hz→200Hz in 70ms
+- `onAnimationComplete` sul fiore SVG → `playPop()`, gain 0.045, 8-bit pop feel
+
 ## [2026-05-04] — Fix audit: qualità codice, robustezza, DX
 
 - **sprites.ts**: SPRITES, CENTERS, GRASS, DIRT, shadowColor, highlightColor centralizzati in un'unica source of truth (erano duplicati in Plant.tsx e svg/route.ts)

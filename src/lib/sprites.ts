@@ -2,11 +2,17 @@
 // Single source of truth for Plant.tsx and api/garden/svg/route.ts
 
 export const SPRITES: readonly (readonly (readonly number[])[])[] = [
+  // 0: 3×3 cross
   [[0,1,0],[1,2,1],[0,1,0]],
+  // 1: 3×3 diagonal
   [[1,0,1],[0,2,0],[1,0,1]],
+  // 2: 5×5 daisy
   [[0,0,1,0,0],[0,1,1,1,0],[1,1,2,1,1],[0,1,1,1,0],[0,0,1,0,0]],
+  // 3: 5×5 star
   [[0,1,0,1,0],[1,1,2,1,1],[0,2,3,2,0],[1,1,2,1,1],[0,1,0,1,0]],
+  // 4: 5×5 chunky
   [[0,1,1,1,0],[1,2,2,2,1],[1,2,3,2,1],[1,2,2,2,1],[0,1,1,1,0]],
+  // 5: 7×7 large
   [
     [0,0,1,1,1,0,0],
     [0,1,1,2,1,1,0],
@@ -16,7 +22,22 @@ export const SPRITES: readonly (readonly (readonly number[])[])[] = [
     [0,1,1,2,1,1,0],
     [0,0,1,1,1,0,0],
   ],
+  // 6: 9×9 legendary — reserved for legendary commits only
+  [
+    [0,0,0,1,1,1,0,0,0],
+    [0,0,1,2,2,2,1,0,0],
+    [0,1,2,2,2,2,2,1,0],
+    [1,2,2,2,3,2,2,2,1],
+    [1,2,2,3,3,3,2,2,1],
+    [1,2,2,2,3,2,2,2,1],
+    [0,1,2,2,2,2,2,1,0],
+    [0,0,1,2,2,2,1,0,0],
+    [0,0,0,1,1,1,0,0,0],
+  ],
 ];
+
+export const LEGENDARY_SPRITE_IDX = SPRITES.length - 1;
+export const REGULAR_SPRITE_COUNT = SPRITES.length - 1; // 0–5 for regular plants
 
 export const CENTERS: Record<string, [string, string]> = {
   positive: ["#fef3c7", "#f59e0b"],

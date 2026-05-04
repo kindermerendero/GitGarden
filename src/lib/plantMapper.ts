@@ -10,6 +10,7 @@ export interface PlantData extends CommitData {
   sentiment: PlantSentiment;
   petalColor: string;
   stemColor: string;
+  legendary: boolean;
 }
 
 // 12-color signature palette (4 per sentiment family)
@@ -47,12 +48,16 @@ export function mapCommitsToPlants(commits: CommitData[]): PlantData[] {
 
   return commits.map((commit, i) => {
     const sentiment = getSentiment(commit.message);
+    // Legendary: massive commit (>1000 lines) OR the oldest commit in a full batch
+    const legendary = commit.linesChanged > 1000 || (i === commits.length - 1 && commits.length >= 25);
+
     return {
       ...commit,
       stemHeight: normalizeHeight(commit.linesChanged, maxLines),
       sentiment,
       petalColor: SIGNATURE[sentiment][i % SIGNATURE[sentiment].length],
       stemColor: STEMS[sentiment],
+      legendary,
     };
   });
 }

@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { fetchCommits } from "@/lib/github";
 import { mapCommitsToPlants, PlantData } from "@/lib/plantMapper";
 import { getTimeTheme } from "@/lib/timeTheme";
-import { SPRITES, CENTERS, GRASS, DIRT, shadowColor, highlightColor } from "@/lib/sprites";
+import { SPRITES, CENTERS, GRASS, DIRT, LEGENDARY_SPRITE_IDX, REGULAR_SPRITE_COUNT, shadowColor, highlightColor } from "@/lib/sprites";
 
 const PX    = 6;
 const GAP   = 2;
@@ -12,7 +12,7 @@ const PAD_Y = 18;
 const REPO_RE = /^[a-zA-Z0-9_.-]+\/[a-zA-Z0-9_.-]+$/;
 
 function dims(plant: PlantData) {
-  const si     = (plant.sha.charCodeAt(0) + plant.sha.charCodeAt(1)) % SPRITES.length;
+  const si     = plant.legendary ? LEGENDARY_SPRITE_IDX : (plant.sha.charCodeAt(0) + plant.sha.charCodeAt(1)) % REGULAR_SPRITE_COUNT;
   const sprite = SPRITES[si];
   const flowerW = sprite[0].length * PX;
   const flowerH = sprite.length * PX;
