@@ -8,15 +8,21 @@
   --color-foreground: #dde0d8;
 }
 
+:root {
+  --garden-bg: #0b0d09;
+  --garden-glow: rgba(52, 100, 52, 0.07);
+}
+
 * {
   box-sizing: border-box;
 }
 
 body {
-  background: #0b0d09;
+  background: var(--garden-bg);
   color: #dde0d8;
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+  transition: background-color 3s ease;
 }
 
 /* Grain texture — lo-fi aesthetic */

@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026-05-04] — Day/Night mode organica basata sull'ora locale
+
+- Aggiunto `src/lib/timeTheme.ts` — 7 fasce orarie (night, dawn, morning, midday, afternoon, dusk, evening) con colori `bg` e `glow` distinti
+- `globals.css`: sfondo e glow centralizzati in CSS variables (`--garden-bg`, `--garden-glow`), `transition: background-color 3s ease` su body
+- `page.tsx`: hook che legge l'ora al mount e aggiorna le variabili ogni minuto via `setProperty`
+- Glow radiale ora usa `var(--garden-glow)` — shift da verde (giorno) a blu (notte) a arancio (alba) a viola (tramonto)
+- Piccolo indicatore del periodo corrente in basso a destra (es. "dusk")
+
 ## [2026-05-04] — Inizializzazione vault Obsidian
 
 - Creata pagina `~/Vault/Progetti/Personal/GitGarden.md` con stack, concept, architettura e TODO

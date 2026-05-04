@@ -1,16 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PlantData } from "@/lib/plantMapper";
 import { Garden } from "@/components/Garden";
 import { SearchForm } from "@/components/SearchForm";
+import { getTimeTheme, TimeTheme } from "@/lib/timeTheme";
 
 export default function Home() {
   const [plants, setPlants] = useState<PlantData[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [currentRepo, setCurrentRepo] = useState<string | null>(null);
+  const [timeTheme, setTimeTheme] = useState<TimeTheme>(getTimeTheme);
+
+  useEffect(() => {
+    const apply = (theme: TimeTheme) => {
+      document.documentElement.style.setProperty("--garden-bg", theme.bg);
+      document.documentElement.style.setProperty("--garden-glow", theme.glow);
+    };
+    apply(timeTheme);
+    const id = setInterval(() => {
+      const next = getTimeTheme();
+      setTimeTheme(next);
+      apply(next);
+    }, 60_000);
+    return () => clearInterval(id);
+  }, []);
 
   const handleGenerate = async (repo: string) => {
     setLoading(true);
@@ -31,15 +47,23 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen flex flex-col" style={{ background: "#0b0d09" }}>
-      {/* Atmospheric radial glow — center-bottom where the garden lives */}
+    <main className="min-h-screen flex flex-col">
+      {/* Atmospheric radial glow — color shifts with time of day */}
       <div
         className="fixed inset-0 pointer-events-none"
         style={{
           background:
-            "radial-gradient(ellipse 70% 45% at 50% 85%, rgba(52, 100, 52, 0.07) 0%, transparent 65%)",
+            "radial-gradient(ellipse 70% 45% at 50% 85%, var(--garden-glow) 0%, transparent 65%)",
         }}
       />
+
+      {/* Time-of-day indicator */}
+      <div
+        className="fixed bottom-5 right-5 text-white/18 pointer-events-none"
+        style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", letterSpacing: "0.1em" }}
+      >
+        {timeTheme.period}
+      </div>
 
       {/* Header */}
       <header className="pt-20 pb-14 flex flex-col items-center px-6">
