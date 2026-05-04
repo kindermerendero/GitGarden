@@ -2,100 +2,92 @@
 
 import { motion } from "framer-motion";
 import { PlantData } from "@/lib/plantMapper";
-import { Plant } from "./Plant";
+import { Plant, plantVariants } from "./Plant";
 
 interface GardenProps {
   plants: PlantData[];
 }
 
-// Deterministic pixel noise for the grass/dirt strip
-function grassPattern(i: number): string {
-  const variants = ["#3a8c22", "#2d7a1a", "#44a028", "#328024", "#26661a"];
-  return variants[(i * 7 + i * i) % variants.length];
+const PX = 6;
+const BLOCKS = 200;
+
+function grassColor(i: number) {
+  const v = ["#3a8c22","#2d7a1a","#44a028","#328024","#26661a"];
+  return v[(i * 7 + i * i) % v.length];
 }
-function dirtPattern(i: number): string {
-  const variants = ["#5a3a1e", "#4a2e14", "#634020", "#523418", "#3e2810"];
-  return variants[(i * 3 + i) % variants.length];
+function dirtColor(i: number) {
+  const v = ["#5a3a1e","#4a2e14","#634020","#523418","#3e2810"];
+  return v[(i * 3 + i) % v.length];
 }
 
 export function Garden({ plants }: GardenProps) {
-  const totalLines = plants.reduce((a, p) => a + p.linesChanged, 0);
+  const totalLines    = plants.reduce((a, p) => a + p.linesChanged, 0);
   const positiveCount = plants.filter((p) => p.sentiment === "positive").length;
   const negativeCount = plants.filter((p) => p.sentiment === "negative").length;
 
-  // 200 blocks × 6px = 1200px, covers any screen
-  const BLOCKS = 200;
-  const PX = 6;
-
   return (
-    <motion.div
-      className="w-full"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
-    >
-      {/* Plants row */}
-      <div className="flex items-end justify-center gap-1 flex-wrap px-4 pb-0 min-h-[220px]">
+    <div className="w-full">
+      {/* ── Plants with staggerChildren ── */}
+      <motion.div
+        className="flex items-end justify-center gap-1 flex-wrap px-4 pb-0 min-h-[220px]"
+        variants={{
+          hidden: {},
+          visible: {
+            transition: { staggerChildren: 0.07, delayChildren: 0.05 },
+          },
+        }}
+        initial="hidden"
+        animate="visible"
+      >
         {plants.map((plant, i) => (
           <Plant key={plant.sha} plant={plant} index={i} />
         ))}
-      </div>
+      </motion.div>
 
-      {/* Pixel-art ground — Minecraft-style grass + dirt */}
+      {/* ── Pixel-art ground ── */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3, duration: 0.5 }}
-        className="overflow-hidden"
         style={{ lineHeight: 0 }}
       >
-        {/* Grass top row */}
         <svg
-          width="100%"
-          height={PX}
+          width="100%" height={PX}
           viewBox={`0 0 ${BLOCKS * PX} ${PX}`}
           preserveAspectRatio="none"
           shapeRendering="crispEdges"
           style={{ imageRendering: "pixelated", display: "block" }}
         >
           {Array.from({ length: BLOCKS }, (_, i) => (
-            <rect key={i} x={i * PX} y={0} width={PX} height={PX} fill={grassPattern(i)} />
+            <rect key={i} x={i*PX} y={0} width={PX} height={PX} fill={grassColor(i)} opacity={0.90} />
           ))}
         </svg>
-
-        {/* Dirt rows */}
-        {[0, 1].map((row) => (
+        {[0,1].map((row) => (
           <svg
             key={row}
-            width="100%"
-            height={PX}
+            width="100%" height={PX}
             viewBox={`0 0 ${BLOCKS * PX} ${PX}`}
             preserveAspectRatio="none"
             shapeRendering="crispEdges"
             style={{ imageRendering: "pixelated", display: "block" }}
           >
             {Array.from({ length: BLOCKS }, (_, i) => (
-              <rect
-                key={i}
-                x={i * PX}
-                y={0}
-                width={PX}
-                height={PX}
-                fill={dirtPattern(i + row * 13)}
-                opacity={0.75 - row * 0.2}
+              <rect key={i} x={i*PX} y={0} width={PX} height={PX}
+                fill={dirtColor(i + row * 13)}
+                opacity={(0.75 - row * 0.2)}
               />
             ))}
           </svg>
         ))}
       </motion.div>
 
-      {/* Stats */}
+      {/* ── Stats ── */}
       <motion.div
         className="flex justify-center gap-8 mt-6"
         style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", letterSpacing: "0.04em" }}
         initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.6, duration: 0.5 }}
+        transition={{ delay: 1.8, duration: 0.5 }}
       >
         <span className="text-white/28">
           <span className="text-white/50">{plants.length}</span> commit
@@ -110,13 +102,13 @@ export function Garden({ plants }: GardenProps) {
         </span>
       </motion.div>
 
-      {/* Minimal legend */}
+      {/* ── Legend ── */}
       <motion.div
         className="flex justify-center gap-5 mt-3"
         style={{ fontFamily: "var(--font-mono)", fontSize: "0.6rem", letterSpacing: "0.05em" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.9, duration: 0.4 }}
+        transition={{ delay: 2.0, duration: 0.4 }}
       >
         {[
           { color: "#7EC8A4", label: "feat · add" },
@@ -132,6 +124,6 @@ export function Garden({ plants }: GardenProps) {
         ))}
         <span className="text-white/20">stelo ∝ Δ righe</span>
       </motion.div>
-    </motion.div>
+    </div>
   );
 }

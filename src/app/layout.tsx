@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Instrument_Serif, Fira_Code, Geist } from "next/font/google";
 import "./globals.css";
+import { GrainOverlay } from "@/components/GrainOverlay";
 
 const instrumentSerif = Instrument_Serif({
   variable: "--font-display",
@@ -35,7 +36,10 @@ export default function RootLayout({
       lang="en"
       className={`${instrumentSerif.variable} ${firaCode.variable} ${geist.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <GrainOverlay />
+        {children}
+      </body>
     </html>
   );
 }

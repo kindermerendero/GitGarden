@@ -1,5 +1,27 @@
 # Changelog
 
+## [2026-05-04] — Deep visual restyling (4 pilastri)
+
+**Pillar 1 — Grain & Texture**
+- Rimosso `body::before` da globals.css
+- Nuovo componente `GrainOverlay` con SVG `feTurbulence` (fractalNoise, 4 octaves) montato in layout.tsx, opacity 0.052
+
+**Pillar 2 — Micro-interazioni organiche**
+- Garden: `staggerChildren: 0.07s` su motion.div container — piante appaiono in sequenza
+- Plant: animazione wind loop infinita (rotate [-amp, +amp]) con wrapper separato dal grow
+- Ampiezza e durata del vento dipendono da `linesChanged`: 0.9°/5.2s (basso) → 2.0°/2.6s (>300 linee)
+- Fase deterministica da `sha.charCodeAt(2)` per desincronizzare le oscillazioni
+
+**Pillar 3 — Hue Shifting**
+- `shadowColor()`: shift verso blu-viola (freddo) + darken
+- `highlightColor()`: shift verso giallo-crema (caldo) + lighten
+- Palette formalizzata: 12 colori signature (4 per famiglia × 3 sentiment)
+- Shadow e highlight usati rispettivamente per offset layer e pixel 2×2 in alto a sinistra
+
+**Pillar 4 — Visual SFX**
+- Bloom: CSS `drop-shadow` vibrante applicato al wind wrapper per commit con >300 linee
+- Pixel Dust: 5 particelle quadrate (3–4px) si alzano dalla testa del fiore e svaniscono in 0.85s al mount
+
 ## [2026-05-04] — Export to README (SVG dinamico)
 
 - Nuova route `GET /api/garden/svg?repo=owner/repo` — genera SVG pixel-art completo server-side
