@@ -1,65 +1,146 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { PlantData } from "@/lib/plantMapper";
+import { Garden } from "@/components/Garden";
+import { SearchForm } from "@/components/SearchForm";
 
 export default function Home() {
+  const [plants, setPlants] = useState<PlantData[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [currentRepo, setCurrentRepo] = useState<string | null>(null);
+
+  const handleGenerate = async (repo: string) => {
+    setLoading(true);
+    setError(null);
+    setPlants([]);
+
+    try {
+      const res = await fetch(`/api/commits?repo=${encodeURIComponent(repo)}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Errore sconosciuto");
+      setPlants(data.plants);
+      setCurrentRepo(repo);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Errore sconosciuto");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen flex flex-col" style={{ background: "#0b0d09" }}>
+      {/* Atmospheric radial glow — center-bottom where the garden lives */}
+      <div
+        className="fixed inset-0 pointer-events-none"
+        style={{
+          background:
+            "radial-gradient(ellipse 70% 45% at 50% 85%, rgba(52, 100, 52, 0.07) 0%, transparent 65%)",
+        }}
+      />
+
+      {/* Header */}
+      <header className="pt-20 pb-14 flex flex-col items-center px-6">
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col items-center gap-3"
+        >
+          <h1
+            className="text-5xl text-white/90 tracking-tight leading-none"
+            style={{ fontFamily: "var(--font-display)", fontStyle: "italic" }}
+          >
+            GitGarden
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p
+            className="text-white/35 text-sm text-center leading-relaxed"
+            style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.02em" }}
+          >
+            ogni commit è una pianta
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        </motion.div>
+
+        <motion.div
+          className="mt-10 w-full max-w-xs"
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.18, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+        >
+          <SearchForm onSubmit={handleGenerate} loading={loading} />
+        </motion.div>
+      </header>
+
+      {/* Canvas area */}
+      <section className="flex-1 px-4 pb-20 relative">
+        <AnimatePresence mode="wait">
+          {error && (
+            <motion.p
+              key="error"
+              className="text-center text-rose-400/60 text-xs mt-10"
+              style={{ fontFamily: "var(--font-mono)" }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              {error}
+            </motion.p>
+          )}
+
+          {!loading && plants.length > 0 && (
+            <motion.div
+              key={currentRepo}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <motion.p
+                className="text-center mb-10 text-white/18"
+                style={{ fontFamily: "var(--font-mono)", fontSize: "0.68rem", letterSpacing: "0.06em" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.1 }}
+              >
+                {currentRepo}
+              </motion.p>
+              <Garden plants={plants} />
+            </motion.div>
+          )}
+
+          {!loading && plants.length === 0 && !error && (
+            <motion.div
+              key="empty"
+              className="flex flex-col items-center justify-center mt-24 gap-5"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ delay: 0.35 }}
+            >
+              {/* Placeholder sketch — more visible */}
+              <svg width="140" height="90" viewBox="0 0 140 90" className="opacity-[0.22]">
+                <line x1="22" y1="80" x2="22" y2="48" stroke="#7ec87e" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="22" cy="42" r="9" fill="#7ec87e" opacity="0.55"/>
+                <line x1="55" y1="80" x2="55" y2="28" stroke="#7ec87e" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="55" cy="21" r="12" fill="#7ec87e" opacity="0.55"/>
+                <line x1="88" y1="80" x2="88" y2="38" stroke="#5bb5d5" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="88" cy="31" r="10" fill="#5bb5d5" opacity="0.55"/>
+                <line x1="118" y1="80" x2="118" y2="50" stroke="#c47ec8" strokeWidth="1.5" strokeLinecap="round"/>
+                <circle cx="118" cy="44" r="8" fill="#c47ec8" opacity="0.55"/>
+                <line x1="0" y1="81" x2="140" y2="81" stroke="#7ec87e" strokeWidth="0.75" opacity="0.25"/>
+              </svg>
+              <p
+                className="text-white/28 text-xs tracking-[0.2em] uppercase"
+                style={{ fontFamily: "var(--font-mono)" }}
+              >
+                il giardino ti aspetta
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </section>
+    </main>
   );
 }
